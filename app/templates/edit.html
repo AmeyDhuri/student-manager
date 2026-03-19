@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block container_class %}container-small{% endblock %}
+{% block content %}
+
+ <div class="title"><h2>Edit Student</h2></div>
+
+<form method="POST">
+    
+    <label>Name:</label>
+    <input type="text" name="name" value="{{ student['name'] }}" required>
+
+    <label>Age:</label>
+    <input type="number" name="age" value="{{ student['age'] }}" required>
+
+    <label>Std:</label>
+    <input type="text" name="standard" value="{{ student['standard'] }}" required>
+
+    <label>Div:</label>
+    <input type="text" name="division" value="{{ student['division'] }}" required>
+
+    <label>Roll no:</label>
+    <input type="number" name="roll_no" value="{{ student['roll_no'] }}" required>
+
+    <button type="submit" class="btn-update">Update</button>
+</form>
+<br>
+<a href="/">Back</a>
+
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block container_class %}container-small{% endblock %}
+
+{% block content %}
+
+<div class="title"><h1>Register</h1></div>
+<form method="POST">
+    <label>Username :</label>
+    <input type="text" name="username" required>
+    <label>Password :</label>
+    <input type="password" name="password" required>
+    <button type="submit" class="btn-register">Register</button>
+</form>
+
+<p>Already have account? <a href="/login">Login</a></p>
+
+{% endblock %}

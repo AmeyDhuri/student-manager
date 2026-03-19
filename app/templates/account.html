@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block container_class %}container-medium{% endblock %}
+
+{% block content %}
+
+<h1 class="main-title">Profile</h1>
+    <div class="content">
+      <input type="radio" name="indicator" checked id="home">
+      <input type="radio" name="indicator" id="about">
+      <div class="list">
+        <label for="home" class="home">
+          <span>Account Details</span>
+        </label>
+
+        <label for="about" class="about">
+          <span>About</span>
+        </label>
+
+        <div class="indicator"></div>
+      </div>
+      <div class="text-content">
+        <div class="home-text">
+            <div class="title">Account Details</div>
+            <br>
+            <strong>Username :</strong> 
+            <p>{{ users['username'] }}</p>
+            <br>
+            <strong>Password :</strong> 
+            <p><sub>*********</sub></p>
+            <button class="btn-update" onclick="togglePasswordForm()">Change Password</button>
+
+            
+            <form method="POST" action="/change_password" id="change-password-form"style="display:none">
+            <br>
+
+            <strong>New Password :</strong>
+            <input type="password" name="new_password" required>
+
+            <strong>Confirm Password :</strong>
+            <input type="password" name="confirm_password" required>
+
+            <br>
+            <button type="submit" class="btn-update">Update Password</button>
+          </form>
+        </div>
+
+        <div class="about-text">
+          <div class="title">About</div>
+          <p>Student Manager is a simple web application built using Python and Flask that allows users to manage student records efficiently. The system includes authentication so users can securely register and log in before accessing the application.</p>
+          <p>The application provides a clean interface to add, edit, delete, search, and sort student records. It is designed as a beginner-friendly backend project to demonstrate CRUD operations, database integration, and basic web application structure.</p>
+          <p>This project was developed as part of my learning journey in backend development with Python, focusing on building real-world applications using Flask and SQLite.</p>
+        </div>
+      </div>
+    </div>
+
+<a href="/">Back</a>
+
+<script>
+function togglePasswordForm(){
+  const form = document.getElementById("change-password-form");
+
+  if(form.style.display === "none"){
+    form.style.display = "block";
+  } else {
+    form.style.display = "none";
+  }
+}
+</script>
+
+{% endblock %}
