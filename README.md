@@ -57,7 +57,7 @@ student-manager/
 ```
 The repository contains a Flask application package, HTML templates for the UI, a static assets folder, and a run.py entry point that creates and runs the app.
 
-Tech Stack
+##Tech Stack
 
 Backend: Flask
 
@@ -69,7 +69,7 @@ Authentication: Werkzeug password hashing + Flask sessions
 
 Environment management: python-dotenv
 
-Installation
+##Installation
 Prerequisites
 
 Python 3.10+ recommended
@@ -109,7 +109,7 @@ python run.py
 
 The app creates its SQLite database automatically on startup through create_tables(app).
 
-Configuration
+##Configuration
 
 The project loads environment variables using python-dotenv and reads SECRET_KEY from the environment. If no SECRET_KEY is provided, it falls back to "dev-secret-key".
 
@@ -126,7 +126,7 @@ SESSION_COOKIE_SECURE = True
 
 SESSION_COOKIE_SAMESITE = "Lax"
 
-Usage
+##Usage
 
 After starting the app:
 
@@ -154,7 +154,7 @@ Edit or delete existing students as needed.
 
 Open the account page to review account details and change your password.
 
-Database
+##Database
 
 The app uses SQLite and creates two tables automatically:
 
@@ -184,7 +184,7 @@ user_id
 
 A uniqueness constraint prevents duplicate roll numbers for the same user within the same standard and division.
 
-Routes Overview
+##Routes Overview
 Authentication
 
 /register — create a new account
@@ -207,7 +207,7 @@ Student management
 
 Edit and delete handlers are also defined in the routes module for updating and removing student records.
 
-Troubleshooting
+##Troubleshooting
 Session/login does not persist locally
 
 The app sets SESSION_COOKIE_SECURE = True, which means session cookies are only sent over HTTPS. When running on plain local HTTP, login sessions may not behave as expected. For local development, you may need to disable this setting temporarily.
@@ -224,7 +224,7 @@ Dependency install issues on non-Windows systems
 
 The dependency list includes pywin32, which is Windows-specific and may fail on Linux or macOS. Remove it locally if your environment does not support it.
 
-Future Improvements
+##Future Improvements
 
 Add form validation with WTForms or Flask-WTF in the UI layer
 
@@ -240,6 +240,6 @@ Add role-based access or admin dashboards
 
 Improve production configuration and deployment docs
 
-Contributors
+##Contributors
 
 AmeyDhuri
