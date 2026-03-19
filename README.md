@@ -4,18 +4,18 @@ A simple Flask-based student management system for registering users, logging in
 
 ## Table of Contents
 
-- [Introduction](#introduction)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Database](#database)
-- [Routes Overview](#routes-overview)
-- [Troubleshooting](#troubleshooting)
-- [Future Improvements](#future-improvements)
-- [Contributors](#contributors)
+- [Introduction]
+- [Features]
+- [Project Structure]
+- [Tech Stack]
+- [Installation]
+- [Configuration]
+- [Usage]
+- [Database]
+- [Routes Overview]
+- [Troubleshooting]
+- [Future Improvements]
+- [Contributors]
 
 ## Introduction
 
