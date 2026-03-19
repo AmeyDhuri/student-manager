@@ -1,6 +1,6 @@
 # Student Manager
 
-A simple Flask-based student management system for registering users, logging in, and managing student records with search, division-based filtering, and pagination. The app uses SQLite for persistence and organizes data per authenticated user. :contentReference[oaicite:0]{index=0}
+A simple Flask-based student management system for registering users, logging in, and managing student records with search, division-based filtering, and pagination. The app uses SQLite for persistence and organizes data per authenticated user.
 
 ## Table of Contents
 
@@ -16,11 +16,10 @@ A simple Flask-based student management system for registering users, logging in
 - [Troubleshooting](#troubleshooting)
 - [Future Improvements](#future-improvements)
 - [Contributors](#contributors)
-- [License](#license)
 
 ## Introduction
 
-Student Manager is a lightweight web application built with Flask that helps users maintain student records in a simple interface. Each user can create an account, sign in, and manage only their own student entries. Student data includes name, age, standard, division, and roll number. The project follows an app-factory structure and stores data in a local SQLite database created inside the Flask instance folder. :contentReference[oaicite:1]{index=1}
+Student Manager is a lightweight web application built with Flask that helps users maintain student records in a simple interface. Each user can create an account, sign in, and manage only their own student entries. Student data includes name, age, standard, division, and roll number. The project follows an app-factory structure and stores data in a local SQLite database created inside the Flask instance folder.
 
 ## Features
 
@@ -33,7 +32,7 @@ Student Manager is a lightweight web application built with Flask that helps use
 - Pagination on the student listing page
 - Per-user separation of student data
 - Duplicate roll-number protection within the same class/division for the same user
-- Account page with password change support :contentReference[oaicite:2]{index=2}
+- Account page with password change support
 
 ## Project Structure
 
