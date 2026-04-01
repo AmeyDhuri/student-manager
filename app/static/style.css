@@ -315,29 +315,31 @@ label{
 }
 
 table {
-      border-radius: 2px;
-      border-collapse: collapse;
-      border-spacing: 0;
-      width: 100%;
-      margin-top: 20px;
-      overflow-x: auto;
-      white-space: nowrap;
+    border-radius: 2px;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
 }
 
 .search-box{
     width: 50%;
 }
 
-th, td {
-      text-align: center;
-      padding: 12px;
-      border: 1px solid #000000;
+th {
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #000000;
+}
+
+td {
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #000000;
 }
 
 th {
-      background: #174458;
-      color: white;
-      border: 1px solid #000000;
+    background: #174458;
+    color: white;
 }
 
 tr:hover {
