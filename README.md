@@ -1,42 +1,51 @@
 # Student Manager
 
-A simple Flask-based student management system for registering users, logging in, and managing student records with search, division-based filtering, and pagination. The app uses SQLite for persistence and organizes data per authenticated user.
+Student Manager is a simple Flask-based web application for managing student records. It allows users to register, log in, and maintain their own student data, including name, age, standard, division, and roll number.
+
+The application uses SQLite for local data storage and keeps each user's student records separate.
 
 ## Table of Contents
 
-- Introduction
-- Features
-- Project Structure
-- Tech Stack
-- Installation
-- Configuration
-- Usage
-- Database
-- Routes Overview
-- Troubleshooting
-- Future Improvements
-- Contributors
-
-## Introduction
-
-Student Manager is a lightweight web application built with Flask that helps users maintain student records in a simple interface. Each user can create an account, sign in, and manage only their own student entries. Student data includes name, age, standard, division, and roll number. The project follows an app-factory structure and stores data in a local SQLite database created inside the Flask instance folder.
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Database](#database)
+- [Routes Overview](#routes-overview)
+- [Troubleshooting](#troubleshooting)
+- [Future Improvements](#future-improvements)
+- [Contributors](#contributors)
+- [License](#license)
 
 ## Features
 
 - User registration and login
-- Password hashing for stored credentials
+- Password hashing using Werkzeug
 - Session-based authentication
 - Add, edit, and delete student records
 - Search students by name
 - Filter students by division
-- Pagination on the student listing page
-- Per-user separation of student data
-- Duplicate roll-number protection within the same class/division for the same user
-- Account page with password change support
+- Pagination for student listings
+- Per-user student data separation
+- Duplicate roll number prevention within the same standard and division
+- Account details page
+- Password change functionality
+- Flash messages for success and error feedback
+
+## Tech Stack
+
+- **Backend:** Flask
+- **Database:** SQLite
+- **Templating:** Jinja2
+- **Authentication:** Flask sessions and Werkzeug password hashing
+- **Environment Variables:** python-dotenv
+- **Frontend:** HTML and CSS
 
 ## Project Structure
 
-```
+```text
 student-manager/
 ├── app/
 │   ├── __init__.py
@@ -51,31 +60,16 @@ student-manager/
 │       ├── index.html
 │       ├── login.html
 │       └── register.html
-├── run.py
-├── requirement.txt
-└── .gitignore
-```
-The repository contains a Flask application package, HTML templates for the UI, a static assets folder, and a run.py entry point that creates and runs the app.
+├── .gitignore
+├── README.md
+├── requirements.txt
+└── run.py
 
-##Tech Stack
-
-Backend: Flask
-
-Database: SQLite
-
-Templating: Jinja2
-
-Authentication: Werkzeug password hashing + Flask sessions
-
-Environment management: python-dotenv
-
-##Installation
+Installation
 Prerequisites
-
-Python 3.10+ recommended
-
+Python 3.10 or newer recommended
 pip
-
+Git
 Steps
 
 Clone the repository:
@@ -97,7 +91,7 @@ source venv/bin/activate
 
 Install dependencies:
 
-pip install -r requirement.txt
+pip install -r requirements.txt
 
 Create a .env file in the project root:
 
@@ -107,139 +101,119 @@ Run the application:
 
 python run.py
 
-The app creates its SQLite database automatically on startup through create_tables(app).
+The app will start in debug mode and create the SQLite database automatically inside the Flask instance folder.
 
-##Configuration
+Configuration
 
-The project loads environment variables using python-dotenv and reads SECRET_KEY from the environment. If no SECRET_KEY is provided, it falls back to "dev-secret-key".
+The app loads environment variables using python-dotenv.
 
-Example:
+Variable	Description	Default
+SECRET_KEY	Secret key used by Flask for sessions	dev-secret-key
 
-SECRET_KEY=change-this-in-production
-Cookie settings
+Example .env file:
 
-The application sets:
+SECRET_KEY=change-this-before-production
+
+The application also sets the following session cookie options:
 
 SESSION_COOKIE_HTTPONLY = True
-
 SESSION_COOKIE_SECURE = True
-
 SESSION_COOKIE_SAMESITE = "Lax"
 
-##Usage
+Note: SESSION_COOKIE_SECURE = True requires HTTPS. For local development over plain HTTP, login sessions may not work as expected unless this setting is disabled temporarily.
 
-After starting the app:
-
-Open the application in your browser.
-
+Usage
+Start the Flask application.
+Open the app in your browser.
 Register a new user account.
-
 Log in with your credentials.
-
-Add student records with details such as:
-
+Add student records with:
 Name
-
 Age
-
 Standard
-
 Division
+Roll number
+Use search and division filters to find records.
+Edit or delete student records as needed.
+Visit the account page to view account details or change your password.
+Database
 
-Roll Number
+The app uses SQLite and automatically creates a database named:
 
-Use search and division filters to find records quickly.
+instance/students.db
 
-Edit or delete existing students as needed.
-
-Open the account page to review account details and change your password.
-
-##Database
-
-The app uses SQLite and creates two tables automatically:
+Two tables are created:
 
 users
-
-id
-
-username
-
-password
-
+Column	Type	Description
+id	INTEGER	Primary key
+username	TEXT	Unique username
+password	TEXT	Hashed password
 students
-
-id
-
-name
-
-age
-
-standard
-
-division
-
-roll_no
-
-user_id
+Column	Type	Description
+id	INTEGER	Primary key
+name	TEXT	Student name
+age	INTEGER	Student age
+standard	TEXT	Student standard/class
+division	TEXT	Student division
+roll_no	INTEGER	Student roll number
+user_id	INTEGER	Linked user ID
 
 A uniqueness constraint prevents duplicate roll numbers for the same user within the same standard and division.
 
-##Routes Overview
+Routes Overview
 Authentication
-
-/register — create a new account
-
-/login — log in
-
-/logout — log out
-
+Route	Method	Description
+/register	GET, POST	Register a new user
+/login	GET, POST	Log in an existing user
+/logout	GET	Log out the current user
 Account
+Route	Method	Description
+/account_details	GET, POST	View account details
+/change_password	POST	Change user password
+Student Management
+Route	Method	Description
+/	GET	View student records with search, filter, and pagination
+/add	POST	Add a new student
+/edit/<int:id>	GET, POST	Edit an existing student
+/delete/<int:id>	POST	Delete a student
+Troubleshooting
+Login session does not persist locally
 
-/account_details — view account details
+The app sets:
 
-/change_password — update password
+SESSION_COOKIE_SECURE = True
 
-Student management
+This means cookies are only sent over HTTPS. If you are testing locally with http://, temporarily set it to:
 
-/ — list students with search, division filter, and pagination
+SESSION_COOKIE_SECURE = False
 
-/add — add a new student
-
-Edit and delete handlers are also defined in the routes module for updating and removing student records.
-
-##Troubleshooting
-Session/login does not persist locally
-
-The app sets SESSION_COOKIE_SECURE = True, which means session cookies are only sent over HTTPS. When running on plain local HTTP, login sessions may not behave as expected. For local development, you may need to disable this setting temporarily.
+Do not use this setting in production without understanding the security impact.
 
 Username already exists
 
-Registration enforces unique usernames. Choose a different username if registration fails.
+Usernames must be unique. Try registering with a different username.
 
-Roll number already exists in the same class/division
+Duplicate roll number error
 
-The database enforces uniqueness for (user_id, standard, division, roll_no). Use a different roll number or update the existing record.
+A student roll number must be unique for the same user, standard, and division.
 
-Dependency install issues on non-Windows systems
+Dependency installation issue
 
-The dependency list includes pywin32, which is Windows-specific and may fail on Linux or macOS. Remove it locally if your environment does not support it.
+Make sure you are installing from the correct file:
 
-##Future Improvements
+pip install -r requirements.txt
 
-Add form validation with WTForms or Flask-WTF in the UI layer
+If installation fails, verify that each dependency in requirements.txt is listed on a separate line.
 
-Improve route typing and error handling
-
+Future Improvements
+Add stronger form validation
+Add CSRF protection to all forms
 Add database migrations
-
-Add unit and integration tests
-
+Add automated tests
 Add Docker support
-
-Add role-based access or admin dashboards
-
-Improve production configuration and deployment docs
-
-##Contributors
-
+Improve production deployment configuration
+Add admin dashboard support
+Add export/import functionality for student records
+Contributors
 AmeyDhuri
