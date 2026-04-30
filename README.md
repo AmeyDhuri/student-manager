@@ -64,7 +64,7 @@ student-manager/
 ├── README.md
 ├── requirements.txt
 └── run.py
-
+```
 ##Installation
 Prerequisites
 Python 3.10 or newer recommended
