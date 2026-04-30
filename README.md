@@ -65,7 +65,7 @@ student-manager/
 ├── requirements.txt
 └── run.py
 
-Installation
+##Installation
 Prerequisites
 Python 3.10 or newer recommended
 pip
@@ -103,7 +103,7 @@ python run.py
 
 The app will start in debug mode and create the SQLite database automatically inside the Flask instance folder.
 
-Configuration
+##Configuration
 
 The app loads environment variables using python-dotenv.
 
@@ -122,7 +122,7 @@ SESSION_COOKIE_SAMESITE = "Lax"
 
 Note: SESSION_COOKIE_SECURE = True requires HTTPS. For local development over plain HTTP, login sessions may not work as expected unless this setting is disabled temporarily.
 
-Usage
+##Usage
 Start the Flask application.
 Open the app in your browser.
 Register a new user account.
@@ -136,7 +136,7 @@ Roll number
 Use search and division filters to find records.
 Edit or delete student records as needed.
 Visit the account page to view account details or change your password.
-Database
+##Database
 
 The app uses SQLite and automatically creates a database named:
 
@@ -161,7 +161,7 @@ user_id	INTEGER	Linked user ID
 
 A uniqueness constraint prevents duplicate roll numbers for the same user within the same standard and division.
 
-Routes Overview
+##Routes Overview
 Authentication
 Route	Method	Description
 /register	GET, POST	Register a new user
@@ -206,7 +206,7 @@ pip install -r requirements.txt
 
 If installation fails, verify that each dependency in requirements.txt is listed on a separate line.
 
-Future Improvements
+##Future Improvements
 Add stronger form validation
 Add CSRF protection to all forms
 Add database migrations
@@ -215,5 +215,5 @@ Add Docker support
 Improve production deployment configuration
 Add admin dashboard support
 Add export/import functionality for student records
-Contributors
+##Contributors
 AmeyDhuri
