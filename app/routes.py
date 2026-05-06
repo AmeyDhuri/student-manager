@@ -1,36 +1,28 @@
-import os
-import sqlite3
 from flask import render_template, request, redirect, session, flash
-from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import IntegrityError
 
-from app.db import get_db_connection
 from app.decorators import login_required
-
+from app.models import db, User, Student
 
 def init_routes(app):
-    def db_conn():
-        db_path = os.path.join(app.instance_path, "students.db")
-        return get_db_connection(db_path)
-
     @app.route("/register", methods=["GET", "POST"])
     def register():
         if request.method == "POST":
-            username = request.form["username"]
-            password = generate_password_hash(request.form["password"])
+            username = request.form["username"].strip()
+            password = request.form["password"]
 
-            conn = db_conn()
-            try:
-                conn.execute(
-                    "INSERT INTO users (username, password) VALUES (?, ?)",
-                    (username, password)
-                )
-                conn.commit()
-            except:
-                conn.close()
+            existing_user = User.query.filter_by(username=username).first()
+            if existing_user:
                 flash("Username already exists", "danger")
                 return redirect("/register")
 
-            conn.close()
+            user = User(username=username)
+            user.set_password(password)
+
+            db.session.add(user)
+            db.session.commit()
+
+            flash("Registration succsessful. Please Login.", "success")
             return redirect("/login")
 
         return render_template("register.html")
@@ -38,19 +30,14 @@ def init_routes(app):
     @app.route("/login", methods=["GET", "POST"])
     def login():
         if request.method == "POST":
-            username = request.form["username"]
+            username = request.form["username"].strip()
             password = request.form["password"]
 
-            conn = db_conn()
-            user = conn.execute(
-                "SELECT * FROM users WHERE username=?",
-                (username,)
-            ).fetchone()
-            conn.close()
+            user = User.query.filter_by(username=username).first()
 
-            if user and check_password_hash(user["password"], password):
-                session["user_id"] = user["id"]
-                session["username"] = user["username"]
+            if user and user.check_password(password):
+                session["user_id"] = user.id
+                session["username"] = user.username
                 return redirect("/")
 
             flash("Invalid credentials!", "danger")
@@ -67,11 +54,7 @@ def init_routes(app):
     @app.route("/account_details", methods=["GET", "POST"])
     @login_required
     def account_details():
-        conn = db_conn()
-        user = conn.execute("SELECT username, password FROM users WHERE id=?",(session["user_id"],)).fetchone()
-
-        conn.close()
-
+        user = User.query.get_or_404(session["user_id"])
         return render_template("account.html", users=user)
 
     @app.route("/change_password", methods=["POST"])
@@ -79,31 +62,21 @@ def init_routes(app):
     def change_password():
         new_password = request.form["new_password"]
         confirm_password = request.form["confirm_password"]
-        conn = db_conn()
-
-        user = conn.execute("SELECT password FROM users WHERE id = ?",(session["user_id"],)).fetchone()
+        
+        user = User.query.get_or_404(session["user_id"])
 
         current_password = user["password"]
 
         if new_password != confirm_password:
             flash("Passwords do not match", "danger")
-            conn.close()
             return redirect("/account_details")
         
-        if check_password_hash(current_password, new_password):
+        if user.check_password(new_password):
             flash("New password cannot be the same as current password", "danger")
-            conn.close()
             return redirect("/account_details")
 
-        hashed = generate_password_hash(new_password)
-
-        
-        conn.execute(
-            "UPDATE users SET password = ? WHERE id = ?",
-            (hashed, session["user_id"])
-        )
-        conn.commit()
-        conn.close()
+        user.set_password(new_password)
+        db.session.commit()
 
         flash("Password updated successfully", "success")
         return redirect("/account_details")
@@ -112,52 +85,36 @@ def init_routes(app):
     @app.route("/")
     @login_required
     def index():
-        search = request.args.get("search")
-        division = request.args.get("division")
+        search = request.args.get("search", "").strip()
+        division = request.args.get("division", "").strip()
         page = request.args.get("page", 1, type=int)
-
         per_page = 5
-        offset = (page - 1) * per_page
+        user_id = session["user_id"]
 
-        conn = db_conn()
-
-        divisions = conn.execute(
-            "SELECT DISTINCT division FROM students WHERE user_id=? ORDER BY division",
-            (session["user_id"],)
-        ).fetchall()
-
-        query = "SELECT * FROM students WHERE user_id=?"
-        params = [session["user_id"]]
+        query = Student.query.filter_by(user_id=user_id)
 
         if search:
-            query += " AND name LIKE ? COLLATE NOCASE"
-            params.append(f"%{search}%")
+            query = query.filter(Student.name.ilike(f"%{search}%"))
 
         if division:
-            query += " AND division=?"
-            params.append(division)
+            query = query.filter_by(division=division)
 
-        query += " ORDER BY division, roll_no LIMIT ? OFFSET ?"
-        params.extend([per_page, offset])
+        pagination = query.order_by(Student.division, Student.roll_no).paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False
+        )
 
-        students = conn.execute(query, params).fetchall()
+        students = pagination.items
 
-        count_query = "SELECT COUNT(*) FROM students WHERE user_id=?"
-        count_params = [session["user_id"]]
-
-        if search:
-            count_query += " AND name LIKE ? COLLATE NOCASE"
-            count_params.append(f"%{search}%")
-
-        if division:
-            count_query += " AND division=?"
-            count_params.append(division)
-
-        total = conn.execute(count_query, count_params).fetchone()[0]
-
-        conn.close()
-
-        total_pages = (total + per_page - 1) // per_page
+        division = (
+            db.session.query(Student.division)
+            .filter_by(user_id=user_id)
+            .distinct()
+            .order_by(Student.division)
+            .all()
+        )
+        divisions = [d[0] for d in division]
 
         return render_template(
             "index.html",
@@ -167,74 +124,97 @@ def init_routes(app):
             division=division,
             divisions=divisions,
             page=page,
-            total_pages=total_pages
+            total_pages=pagination.pages
         )
 
     @app.route("/add", methods=["POST"])
     @login_required
     def add():
-        name = request.form["name"]
-        age = int(request.form["age"])
-        standard = request.form["standard"]
-        division = request.form["division"]
-        roll_no = int(request.form["roll_no"])
+        name = request.form["name"].strip()
+        standard = request.form["standard"].strip()
+        division = request.form["division"].strip()
+        
+        try:
+            age = int(request.form["age"])
+            roll_no = int(request.form["roll_no"])
+        except ValueError:
+            flash("Age and Roll Number must be valid numbers!", "danger")
+            return redirect("/")
 
         if age <= 0 or roll_no <= 0:
             flash("Age and Roll Number must be positive!", "danger")
             return redirect("/")
 
-        conn = db_conn()
+        student = Student(
+            name=name,
+            age=age,
+            standard=standard,
+            division=division,
+            roll_no=roll_no,
+            user_id=session["user_id"]
+        )
+
         try:
-            conn.execute(
-                "INSERT INTO students (name, age, standard, division, roll_no, user_id) VALUES (?, ?, ?, ?, ?, ?)",
-                (name, age, standard, division, roll_no, session["user_id"])
-            )
-            conn.commit()
+            db.session.add(student)
+            db.session.commit()
             flash("Successfully added a student!", "success")
-        except sqlite3.IntegrityError:
+        except IntegrityError:
+            db.session.rollback()
             flash("Roll number already exists in this class/division!", "danger")
 
-        conn.close()
         return redirect("/")
 
     @app.route("/edit/<int:id>", methods=["GET", "POST"])
     @login_required
     def edit(id):
-        conn = db_conn()
+        student = Student.query.filter_by(
+            id = id,
+            user_id = session["user_id"]
+        ).first_or_404()
 
         if request.method == "POST":
-            name = request.form["name"]
-            age = request.form["age"]
-            standard = request.form["standard"]
-            division = request.form["division"]
-            roll_no = request.form["roll_no"]
+            name = request.form["name"].strip()
+            standard = request.form["standard"].strip()
+            division = request.form["division"].strip()
 
-            conn.execute(
-                "UPDATE students SET name=?, age=?, standard=?, division=?, roll_no=? WHERE id=? AND user_id=?",
-                (name, age, standard, division, roll_no, id, session["user_id"])
-            )
-            conn.commit()
-            conn.close()
-            return redirect("/")
+            try:
+                age = int(request.form["age"])
+                roll_no = int(request.form["roll_no"])
+            except:
+                flash("Age or Roll no must be valid numbers !", "danger")
+                return redirect(f"/edit/{id}")
+            
+            if age <= 0 or roll_no <= 0:
+                flash("Age and Roll Number must be positive!", "danger")
+                return redirect(f"/edit/{id}")
+            
+            student.name = name
+            student.age = age
+            student.standard = standard
+            student.division = division
+            student.roll_no = roll_no
 
-        student = conn.execute(
-            "SELECT * FROM students WHERE id=? AND user_id=?",
-            (id, session["user_id"])
-        ).fetchone()
-        conn.close()
+            try:
+                db.session.commit()
+                flash("Student updated successfully!", "success")
+                return redirect("/")
+            except IntegrityError:
+                db.session.rollback()
+                flash("Roll number already exists in this class/division!", "danger")
+                return redirect(f"/edit/{id}")
 
         return render_template("edit.html", student=student)
 
     @app.route("/delete/<int:id>", methods=["POST"])
     @login_required
     def delete(id):
-        conn = db_conn()
-        conn.execute(
-            "DELETE FROM students WHERE id=? AND user_id=?",
-            (id, session["user_id"])
-        )
-        conn.commit()
-        conn.close()
+        student = Student.query.filter_by(
+            id=id,
+            user_id=session["user_id"]
+        ).first_or_404()
+
+        db.session.delete(student)
+        db.session.commit()
 
         flash("Student deleted successfully!", "danger")
         return redirect("/")

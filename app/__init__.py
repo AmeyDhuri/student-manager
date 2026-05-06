@@ -2,7 +2,6 @@ import os
 from flask import Flask
 from dotenv import load_dotenv
 
-from app.db import create_tables
 from app.models import db
 from app.routes import init_routes
 
@@ -25,7 +24,8 @@ def create_app():
 
     db.init_app(app)
 
-    create_tables(app)
-    init_routes(app)
+    with app.app_context():
+        db.create_all()
 
+    init_routes(app)
     return app
