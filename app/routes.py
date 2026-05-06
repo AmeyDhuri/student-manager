@@ -62,15 +62,13 @@ def init_routes(app):
     def change_password():
         new_password = request.form["new_password"]
         confirm_password = request.form["confirm_password"]
-        
-        user = User.query.get_or_404(session["user_id"])
 
-        current_password = user["password"]
+        user = User.query.get_or_404(session["user_id"])
 
         if new_password != confirm_password:
             flash("Passwords do not match", "danger")
             return redirect("/account_details")
-        
+
         if user.check_password(new_password):
             flash("New password cannot be the same as current password", "danger")
             return redirect("/account_details")
@@ -107,14 +105,14 @@ def init_routes(app):
 
         students = pagination.items
 
-        division = (
+        division_list = (
             db.session.query(Student.division)
             .filter_by(user_id=user_id)
             .distinct()
             .order_by(Student.division)
             .all()
         )
-        divisions = [d[0] for d in division]
+        divisions = [d[0] for d in division_list]
 
         return render_template(
             "index.html",
